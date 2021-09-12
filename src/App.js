@@ -1,10 +1,22 @@
+
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link, Redirect, } from "react-router-dom";
+import Userfront from "@userfront/react";
+
+Userfront.init("8nwqvvnw");
+
+const SignupForm = Userfront.build({
+  toolId: "odaakd"
+});
+
+const LoginForm = Userfront.build({
+  toolId: "araamd"
+});
+
+const PasswordResetForm = Userfront.build({
+  toolId: "brmmna"
+});
+
 
 export default function App() {
   return (
@@ -13,27 +25,31 @@ export default function App() {
         <nav>
           <ul>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/home">Home</Link>
             </li>
             <li>
-              <Link to="/about">About</Link>
+              <Link to="/Login">Login</Link>
             </li>
             <li>
-              <Link to="/users">Users</Link>
+              <Link to="/reset">Reset</Link>
+            </li>
+            <li>
+              <Link to="/dashboard">Dashboard</Link>
             </li>
           </ul>
         </nav>
 
-        {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
         <Switch>
-          <Route path="/about">
-            <About />
+          <Route path="/Login">
+            <Login />
           </Route>
-          <Route path="/users">
-            <Users />
+          <Route path="/reset">
+            <PasswordReset />
           </Route>
-          <Route path="/">
+          <Route path="/dashboard">
+            <Dashboard />
+          </Route>
+          <Route path="/home">
             <Home />
           </Route>
         </Switch>
@@ -43,13 +59,56 @@ export default function App() {
 }
 
 function Home() {
-  return <h2>Home</h2>;
+  return (
+    <div>
+      <h2>Home</h2>
+      <SignupForm />
+    </div>
+  );
 }
 
-function About() {
-  return <h2>About</h2>;
+function Login() {
+  return (
+    <div>
+      <h2>Login</h2>
+      <LoginForm />
+    </div>
+  );
 }
 
-function Users() {
-  return <h2>Users</h2>;
+function PasswordReset() {
+  return (
+    <div>
+      <h2>Password Reset</h2>
+      <PasswordResetForm />
+    </div>
+  );
+}
+
+function Dashboard() {
+  function renderFn({ location }) {
+    // If the user is not logged in, redirect to login
+    if (!Userfront.accessToken()) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/login",
+            state: { from: location },
+          }}
+        />
+      );
+    }
+
+    // If the user is logged in, show the dashboard
+    const userData = JSON.stringify(Userfront.user, null, 2);
+    return (
+      <div>
+        <h2>Dashboard</h2>
+        <pre>{userData}</pre>
+        <button onClick={Userfront.logout}>Logout</button>
+      </div>
+    );
+  }
+
+  return <Route render={renderFn} />;
 }
